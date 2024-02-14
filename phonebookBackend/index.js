@@ -1,6 +1,6 @@
 const express = require('express');
 
-const contacts = [
+let contacts = [
     { 
       "id": 1,
       "name": "Arto Hellas", 
@@ -44,6 +44,16 @@ app.get("/info", (request, response) => {
   <p> ${new Date() }`)
 })
 
+app.delete("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id)
+  const contact = contacts.find(contact => contact.id === id)
+  if (contact) {
+    contacts = contacts.filter(contact1 => contact1 != contact)
+    response.json(contact)
+  } else {
+    response.status(404).end()
+  }
+})
 
 app.listen(3001)
 console.log('Server running on port 3001')
