@@ -1,4 +1,5 @@
 const express = require('express');
+const morgan = require('morgan')
 
 let contacts = [
     { 
@@ -25,6 +26,19 @@ let contacts = [
 
 const app = express()
 app.use(express.json())
+app.use(morgan((tokens, req, res) => {
+  let retArr = [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms'
+  ]
+  if (tokens.method(req, res) == 'POST') {
+    retArr.push(JSON.stringify(req.body))
+  }
+  return retArr.join(' ')
+}))
 
 app.get("/api/persons", (request, response) => {
    response.json(contacts)
