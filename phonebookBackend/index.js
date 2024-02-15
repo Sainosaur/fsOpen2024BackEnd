@@ -57,15 +57,24 @@ app.delete("/api/persons/:id", (request, response) => {
 })
 
 app.post("/api/persons", (request, response) => {
-  const contact = {
+  const person = {
     "id" : Math.floor(Math.random() * 100000),
     "name": request.body.name,
     "number": request.body.number
 
   }
-  contacts = contacts.concat(contact)
-  console.log(contacts)
-  response.json(contact)
+  console.log(request.body)
+  if (!contacts.find(contact => contact.name == person.name)) {
+    if (person.name && person.number) {
+      contacts = contacts.concat(person)
+      response.json(person)
+    } else {
+      response.status(400).json({error: "Incomplete contact recieved"})
+    }
+
+  } else {
+    response.status(409).json({error: "Name already exists please check and try again!"})
+  }
 }) 
 
 app.listen(3001)
