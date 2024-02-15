@@ -24,6 +24,7 @@ let contacts = [
 ]
 
 const app = express()
+app.use(express.json())
 
 app.get("/api/persons", (request, response) => {
    response.json(contacts)
@@ -54,6 +55,18 @@ app.delete("/api/persons/:id", (request, response) => {
     response.status(404).end()
   }
 })
+
+app.post("/api/persons", (request, response) => {
+  const contact = {
+    "id" : Math.floor(Math.random() * 100000),
+    "name": request.body.name,
+    "number": request.body.number
+
+  }
+  contacts = contacts.concat(contact)
+  console.log(contacts)
+  response.json(contact)
+}) 
 
 app.listen(3001)
 console.log('Server running on port 3001')
