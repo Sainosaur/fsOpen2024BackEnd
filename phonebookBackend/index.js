@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan')
+const cors = require('cors')
 
 let contacts = [
     { 
@@ -25,6 +26,7 @@ let contacts = [
 ]
 
 const app = express()
+app.use(cors())
 app.use(express.json())
 app.use(morgan((tokens, req, res) => {
   let retArr = [
@@ -39,6 +41,7 @@ app.use(morgan((tokens, req, res) => {
   }
   return retArr.join(' ')
 }))
+
 
 app.get("/api/persons", (request, response) => {
    response.json(contacts)
