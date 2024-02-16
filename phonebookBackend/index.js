@@ -1,6 +1,9 @@
 const express = require('express');
 const morgan = require('morgan')
 const cors = require('cors')
+const port = process.env.PORT || 3000
+const path = require('path')
+const fs = require('fs')
 
 let contacts = [
     { 
@@ -42,6 +45,18 @@ app.use(morgan((tokens, req, res) => {
   return retArr.join(' ')
 }))
 
+app.get('/', (request, response) => {
+  response.sendFile(path.join(__dirname, '/dist/index.html'))
+})
+
+app.get('/dist/assets/:file', (request, response) => {
+  const filepath = path.join(__dirname, '/dist/assets',request.params.file)
+  if (fs.existsSync(filepath)) {
+    response.sendFile(filepath)
+  } else {
+    request.status(404).end()
+  }
+})
 
 app.get("/api/persons", (request, response) => {
    response.json(contacts)
@@ -94,5 +109,4 @@ app.post("/api/persons", (request, response) => {
   }
 }) 
 
-app.listen(3001)
-console.log('Server running on port 3001')
+app.listen(port,'0.0.0.0')
