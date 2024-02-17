@@ -11,10 +11,15 @@ const contactSchema = new mongoose.Schema({
 
 const Contact = mongoose.model('Contact', contactSchema)
 
-const returnData = (request, response) => {
+const returnData = (request, response, id ) => {
+    if (!id) {
     Contact.find({}).then(contacts => {
         response.json(contacts)
     })
+    } else if (id) {
+        Contact.findById(id).then(contacts =>
+            response.json(contacts))
+    }
 }
 
 const saveNumber = (request, response) => {
