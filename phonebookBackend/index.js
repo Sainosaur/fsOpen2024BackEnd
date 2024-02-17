@@ -1,3 +1,5 @@
+require('dotenv').config()
+const Contact = require('./modules/Contact')
 const express = require('express');
 const morgan = require('morgan')
 const cors = require('cors')
@@ -59,7 +61,7 @@ app.get('/dist/assets/:file', (request, response) => {
 })
 
 app.get("/api/persons", (request, response) => {
-   response.json(contacts)
+   Contact.returnData(request, response)
 })
 
 app.get("/api/persons/:id", (request, response) => {
@@ -109,4 +111,4 @@ app.post("/api/persons", (request, response) => {
   }
 }) 
 
-app.listen(port,'0.0.0.0')
+app.listen(port,'127.0.0.1')
