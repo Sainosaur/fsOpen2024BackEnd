@@ -17,6 +17,21 @@ const returnData = (request, response) => {
     })
 }
 
+const saveNumber = (request, response) => {
+    const person = new Contact({
+            name : request.body.name,
+            number : request.body.number
+    })
+    if (person.name && person.number) {
+        person.save()
+        response.json(person)
+    } else {
+        response.status(500).end()
+    }
+
+}
+
 module.exports = {
-    returnData
+    returnData,
+    saveNumber
 }
