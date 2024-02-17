@@ -74,18 +74,11 @@ app.get("/info", (request, response) => {
 })
 
 app.delete("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id)
-  const contact = contacts.find(contact => contact.id === id)
-  if (contact) {
-    contacts = contacts.filter(contact1 => contact1 != contact)
-    response.json(contact)
-  } else {
-    response.status(404).end()
-  }
+  Contact.deleteContact(response, String(request.params.id))
 })
 
 app.post("/api/persons", (request, response) => {
-  Contact.saveNumber(request, response)
+  Contact.saveContact(request, response)
 }) 
 
 app.listen(port,'127.0.0.1')
