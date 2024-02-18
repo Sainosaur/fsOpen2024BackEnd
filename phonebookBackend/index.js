@@ -7,11 +7,12 @@ const port = process.env.PORT || 3000
 const path = require('path')
 const app = express()
 const errorHandler = (error, request, response, next) => {
-  console.error(error)
   if (error.name == 'CastError' || error.message == 'BadRequest') {
     response.status(400).send("Bad Request")
   } else if (error.message == "NotFound") {
     response.status(404).send("Not Found")
+  } else if (error.name == "ValidationError") {
+    response.status(400).send("Illegal Contact")
   } else {
     next(error)
   }
@@ -71,7 +72,7 @@ app.put("/api/persons/:id", (req, res, next) => {
 } )
 
 app.post("/api/persons", (request, response, next) => {
-  Contact.saveContact(request, response)
+  Contact.saveContact(request, response, next)
 }) 
 
 // Needs to come at the end of all ROUTES to function not just end of the list of middleware!!!

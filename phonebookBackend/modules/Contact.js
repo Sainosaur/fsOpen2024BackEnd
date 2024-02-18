@@ -5,8 +5,15 @@ mongoose.set('strictQuery', false)
 mongoose.connect(URL)
 
 const contactSchema = new mongoose.Schema({
-    name : String,
-    number : Number
+    name : {
+        type : String,
+        minLength : 3,
+        required: true
+    },
+    number : {
+        type: Number,
+        required: true
+    }
 })
 
 const Contact = mongoose.model('Contact', contactSchema)
@@ -37,13 +44,9 @@ const saveContact = (request, response, next) => {
             name : request.body.name,
             number : request.body.number
     })
-    if (person.name && person.number) {
-        person.save().then(result => response.json(result)).catch(error => {
-            next(error)
-        })
-    } else {
-        throw new Error("BadRequest")
-    }
+    person.save().then(result => response.json(result)).catch(error => {
+        next(error)
+    })
 
 }
 const deleteContact = (request, response, id, next) => {
