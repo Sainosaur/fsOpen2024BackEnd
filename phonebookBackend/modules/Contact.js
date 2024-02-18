@@ -57,8 +57,18 @@ const deleteContact = (request, response, id, next) => {
         next(error)
     })
 }
+
+const ammendContact = (person, response, id) => {
+    Contact.findByIdAndUpdate(id, person, { new : true }).then(contact => {
+        response.json(contact)
+    }).catch(error => {
+        throw new Error("BadRequest")
+    })
+}
+
 module.exports = {
     returnData,
     saveContact,
-    deleteContact
+    deleteContact,
+    ammendContact
 }

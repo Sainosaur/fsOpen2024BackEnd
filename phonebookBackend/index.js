@@ -63,9 +63,19 @@ app.delete("/api/persons/:id", (request, response, next) => {
   Contact.deleteContact(request, response, String(request.params.id), next)
 })
 
+app.put("/api/persons/:id", (req, res, next) => {
+  const id = String(req.params.id)
+  const ammendedContact = {
+    name : req.body.name,
+    number : req.body.number
+  }
+  Contact.ammendContact(ammendedContact, res, id)
+} )
+
 app.post("/api/persons", (request, response, next) => {
   Contact.saveContact(request, response)
 }) 
+
 // Needs to come at the end of all ROUTES to function not just end of the list of middleware!!!
 app.use(errorHandler)
 
