@@ -11,46 +11,45 @@ const contactSchema = new mongoose.Schema({
 
 const Contact = mongoose.model('Contact', contactSchema)
 
-const returnData = (request, response, id ) => {
+const returnData = (request, response, id, next ) => {
     if (!id) {
     Contact.find({}).then(contacts => {
         response.json(contacts)
     }).catch(error => {
-        console.log(error)
-        response.status(500).end()
+        next(error)
     })
     } else if (id) {
         Contact.findById(id).then(contacts =>
             response.json(contacts))
             .catch(error => {
-                console.log(error)
-                response.status(400).end()
+                next(error)
             })
     }
 }
 
-const saveContact = (request, response) => {
+const saveContact = (request, response, next) => {
     const person = new Contact({
             name : request.body.name,
             number : request.body.number
     })
     if (person.name && person.number) {
         person.save().then(result => response.json(result)).catch(error => {
-            console.log(error)
-            response.status(404).end()
+            next(error)
         })
     } else {
-        response.status(500).end()
+        throw new Error("BadRequest")
     }
 
 }
-const deleteContact = (response, id) => {
+const deleteContact = (request, response, id, next) => {
     Contact.findByIdAndDelete(id).then(contact => {
         if (contact) {
         response.json(contact)
         } else {
-            response.status(404).end()
+            throw new Error("Not found")
         }
+    }).catch(error => {
+        next(error)
     })
 }
 module.exports = {
