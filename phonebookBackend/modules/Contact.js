@@ -11,7 +11,7 @@ const contactSchema = new mongoose.Schema({
 
 const Contact = mongoose.model('Contact', contactSchema)
 
-const returnData = (request, response, id, next ) => {
+const returnData = (response, id, next ) => {
     if (!id) {
     Contact.find({}).then(contacts => {
         response.json(contacts)
@@ -65,10 +65,17 @@ const ammendContact = (person, response, id) => {
         throw new Error("BadRequest")
     })
 }
+const dbInfo = (response) => {
+    Contact.find({}).then(data => {
+        response.send(`<p> Phonebook has info for ${data.length} people </p>
+        <p> ${new Date() }`)
+    })
+} 
 
 module.exports = {
     returnData,
     saveContact,
     deleteContact,
-    ammendContact
+    ammendContact,
+    dbInfo
 }

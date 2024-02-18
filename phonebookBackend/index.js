@@ -5,7 +5,6 @@ const morgan = require('morgan')
 const cors = require('cors')
 const port = process.env.PORT || 3000
 const path = require('path')
-const fs = require('fs')
 const app = express()
 const errorHandler = (error, request, response, next) => {
   console.error(error)
@@ -47,16 +46,15 @@ app.get('/dist/assets/:file', (request, response, next) => {
 })
 
 app.get("/api/persons", (request, response, next) => {
-   Contact.returnData(request, response)
+   Contact.returnData(response)
 })
 
 app.get("/api/persons/:id", (request, response, next) => {
-  Contact.returnData(request, response, String(request.params.id), next)
+  Contact.returnData(response, String(request.params.id), next)
 })
 
 app.get("/info", (request, response, next) => {
-  response.send(`<p> Phonebook has info for ${contacts.length} people </p>
-  <p> ${new Date() }`)
+  Contact.dbInfo(response)
 })
 
 app.delete("/api/persons/:id", (request, response, next) => {
