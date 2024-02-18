@@ -34,11 +34,11 @@ app.use(morgan((tokens, req, res) => {
   return retArr.join(' ')
 }))
 
-app.get('/', (request, response, next) => {
+app.get('/', (request, response) => {
   response.sendFile(path.join(__dirname, '/dist/index.html'))
 })
 
-app.get('/dist/assets/:file', (request, response, next) => {
+app.get('/dist/assets/:file', (request, response) => {
   const filepath = path.join(__dirname, '/dist/assets',request.params.file)
   if (fs.existsSync(filepath)) {
     response.sendFile(filepath)
@@ -47,7 +47,7 @@ app.get('/dist/assets/:file', (request, response, next) => {
   }
 })
 
-app.get("/api/persons", (request, response, next) => {
+app.get("/api/persons", (request, response) => {
    Contact.returnData(response)
 })
 
@@ -55,7 +55,7 @@ app.get("/api/persons/:id", (request, response, next) => {
   Contact.returnData(response, String(request.params.id), next)
 })
 
-app.get("/info", (request, response, next) => {
+app.get("/info", (request, response) => {
   Contact.dbInfo(response)
 })
 
@@ -63,7 +63,7 @@ app.delete("/api/persons/:id", (request, response, next) => {
   Contact.deleteContact(request, response, String(request.params.id), next)
 })
 
-app.put("/api/persons/:id", (req, res, next) => {
+app.put("/api/persons/:id", (req, res) => {
   const id = String(req.params.id)
   const ammendedContact = {
     name : req.body.name,
