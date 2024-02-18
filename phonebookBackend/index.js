@@ -3,6 +3,7 @@ const Contact = require('./modules/Contact')
 const express = require('express');
 const morgan = require('morgan')
 const cors = require('cors')
+const fs = require('fs')
 const port = process.env.PORT || 3000
 const path = require('path')
 const app = express()
@@ -78,4 +79,4 @@ app.post("/api/persons", (request, response, next) => {
 // Needs to come at the end of all ROUTES to function not just end of the list of middleware!!!
 app.use(errorHandler)
 
-app.listen(port,'127.0.0.1')
+app.listen(port,'0.0.0.0')
