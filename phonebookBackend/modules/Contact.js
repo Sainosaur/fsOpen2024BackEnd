@@ -11,7 +11,14 @@ const contactSchema = new mongoose.Schema({
         required: true
     },
     number : {
-        type: Number,
+        type: String,
+        minLength: 8,
+        validate: {
+            validator: (v) => {
+                return /\d{2,3}-\d+/.test(v)
+            },
+            message : (props) => `${props.value}`
+        },
         required: true
     }
 })
@@ -45,6 +52,7 @@ const saveContact = (request, response, next) => {
             number : request.body.number
     })
     person.save().then(result => response.json(result)).catch(error => {
+        console.log(error)
         next(error)
     })
 
