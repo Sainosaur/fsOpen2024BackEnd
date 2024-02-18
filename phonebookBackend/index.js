@@ -8,6 +8,7 @@ const path = require('path')
 const fs = require('fs')
 const app = express()
 const errorHandler = (error, request, response, next) => {
+  console.error(error)
   if (error.name == 'CastError' || error.message == 'BadRequest') {
     response.status(400).send("Bad Request")
   } else if (error.message == "NotFound") {
@@ -65,6 +66,7 @@ app.delete("/api/persons/:id", (request, response, next) => {
 app.post("/api/persons", (request, response, next) => {
   Contact.saveContact(request, response)
 }) 
+// Needs to come at the end of all ROUTES to function not just end of the list of middleware!!!
 app.use(errorHandler)
 
 app.listen(port,'127.0.0.1')

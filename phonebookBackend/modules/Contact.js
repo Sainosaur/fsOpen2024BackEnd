@@ -19,8 +19,13 @@ const returnData = (request, response, id, next ) => {
         next(error)
     })
     } else if (id) {
-        Contact.findById(id).then(contacts =>
-            response.json(contacts))
+        Contact.findById(id).then(contacts => {
+            if (contacts) {
+            response.json(contacts)}
+            else {
+                throw new Error("NotFound")
+            }
+    })
             .catch(error => {
                 next(error)
             })
