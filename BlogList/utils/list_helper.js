@@ -45,14 +45,34 @@ const mostBlogs = (blogs) => {
         blogs : maxBlogs
     }
 }
-
+const mostLikes = (blogs) => {
+    const authorGroup = lodash.groupBy(blogs, 'author')
+    console.log(authorGroup)
+    let maxAuthor = ""
+    let maxLikes = 0
+    for (author in authorGroup) {
+        let likes = 0
+        for (post in authorGroup[author]) {
+            likes += authorGroup[author][post].likes
+        }
+        if (likes > maxLikes) {
+            maxLikes = likes
+            maxAuthor = author
+        }
+    }
+    return {
+        author : maxAuthor,
+        likes : maxLikes
+    }
+}
 module.exports = {
     dummy,
     totalLikes,
     favoriteBlog,
-    mostBlogs
+    mostBlogs,
+    mostLikes
 }
-console.log(mostBlogs([
+console.log(mostLikes([
     {
         _id: "5a422a851b54a676234d17f7",
         title: "React patterns",
