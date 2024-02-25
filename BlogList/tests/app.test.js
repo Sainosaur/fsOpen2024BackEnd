@@ -53,6 +53,16 @@ const mongoose = require('mongoose')
         //Checks if the response has 0 likes after the field is missing from the POST request
         assert.strictEqual(res.body.likes, 0)
     })
+    test('server responds with 400 (Bad request) when given incomplete blog object', async () => {
+        const testBlog = {
+            url: "bread",
+            likes : 5
+        }
+        const res = api
+        .post('/api/blogs')
+        .send(testBlog)
+        .expect(400)
+    })
 after(async () => {
     // Logic to be executed after each test
     await mongoose.connection.close()
