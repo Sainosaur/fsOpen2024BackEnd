@@ -47,7 +47,6 @@ const mostBlogs = (blogs) => {
 }
 const mostLikes = (blogs) => {
     const authorGroup = lodash.groupBy(blogs, 'author')
-    console.log(authorGroup)
     let maxAuthor = ""
     let maxLikes = 0
     for (author in authorGroup) {

@@ -14,7 +14,6 @@ BlogRouter.get('/', async (request, response, next) => {
 
 BlogRouter.post('/', (request, response) => {
   const blog = new Blog(request.body)
-  console.log(request.body)
   blog
     .save()
     .then(result => {
