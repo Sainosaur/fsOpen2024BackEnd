@@ -25,14 +25,20 @@ const mongoose = require('mongoose')
         .send(testBlog)
         .expect(201)
         const res1 = await api.get('/api/blogs')
-        const resBlog = {
-            title : res.body.title,
-            author : res.body.author,
-            url : res.body.url,
-            likes : res.body.likes
-        }
         // Checks whether one note has been added to the db
-        assert.strictEqual(res1 + (res0+1))
+        assert.strictEqual(res1.body.length,  (res0.body.length + 1))
+    })
+    test('identifier property of the blog posts is named id', async () => {
+        const res = await api
+        .get('/api/blogs')
+        .expect(200)
+        let _idExist = false
+        res.body.forEach(element => {
+            if (element._id) {
+                _idExist = true
+            }
+        })
+        assert.strictEqual(_idExist, false)
     })
 after(async () => {
     // Logic to be executed after each test
