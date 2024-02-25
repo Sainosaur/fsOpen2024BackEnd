@@ -40,6 +40,19 @@ const mongoose = require('mongoose')
         })
         assert.strictEqual(_idExist, false)
     })
+    test('if likes property is not included it is set to 0 by the server', async () => {
+        const testBlog = {
+            title : 'Test',
+            author : "Me",
+            url : 'https://www.google.com',
+        }
+        const res = await api
+        .post('/api/blogs')
+        .send(testBlog)
+        .expect(201)
+        //Checks if the response has 0 likes after the field is missing from the POST request
+        assert.strictEqual(res.body.likes, 0)
+    })
 after(async () => {
     // Logic to be executed after each test
     await mongoose.connection.close()
