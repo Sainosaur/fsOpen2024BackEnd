@@ -3,12 +3,13 @@ const BlogRouter = require('express').Router()
 const cors = require("cors")
 // loads in Blog object from models to allow for sending data to Mongo Atlas
 const Blog = require('../models/blog')
+const User = require('../models/User')
 
 BlogRouter.use(cors())
 BlogRouter.use(express.json())
 
 BlogRouter.get('/', async (request, response, next) => {
-  const blogs = await Blog.find({})
+  const blogs = await Blog.find({}).populate('user')
   response.json(blogs)
 })
 
@@ -19,6 +20,11 @@ BlogRouter.post('/', async (request, response) => {
   const blog = new Blog(request.body)
   try {
       const req = await blog.save()
+      console.log(req)
+      const user = await User.findByIdAndUpdate(request.body.user)
+      user.blogs = user.blogs.concat(String(req._id))
+      await user.save()
+
       response.status(201).json(req)
     } catch {
       response.status(400).json('Bad Request')

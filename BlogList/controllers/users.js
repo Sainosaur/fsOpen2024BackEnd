@@ -7,7 +7,7 @@ userRouter.use(express.json())
 userRouter.use(cors())
 
 userRouter.get('/', async (req, res) => {
-    const data = await User.find({})
+    const data = await User.find({}).populate('blogs')
     res.status(200).json(data)
 })
 
