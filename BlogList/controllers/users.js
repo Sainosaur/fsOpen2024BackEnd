@@ -12,8 +12,8 @@ userRouter.get('/', async (req, res) => {
 })
 
 userRouter.post('/', async (req, res) => {
-    // Generating a hash based on the password supplied with 'salt' 10
-    const passwordHash = await bcrypt.hash(req.body.password, 10)
+    // Generating a hash if legal password supplied with 'salt' 10
+    const passwordHash = (req.body.password.length > 3) ? await bcrypt.hash(req.body.password, 10) : null
     // Processing input data to create object needed
     const data = {
         username : req.body.username,
@@ -27,7 +27,7 @@ userRouter.post('/', async (req, res) => {
         const response = await user.save()
         res.status(201).json(response)
     } catch {
-        res.status(500).json("Internal server error")
+        res.status(400).json("Invalid user created")
     }
 })
 
