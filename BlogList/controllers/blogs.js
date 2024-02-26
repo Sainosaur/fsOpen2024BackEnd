@@ -4,6 +4,16 @@ const cors = require("cors")
 // loads in Blog object from models to allow for sending data to Mongo Atlas
 const Blog = require('../models/blog')
 const User = require('../models/User')
+const jwt = require('jsonwebtoken')
+const config = require('../utils/config')
+
+const returnToken = (request) => {
+  const token = request.get('authorization')
+  if (token) {
+    token.replace('Bearer ', '')
+  }
+  return token
+}
 
 BlogRouter.use(cors())
 BlogRouter.use(express.json())
@@ -18,10 +28,10 @@ BlogRouter.post('/', async (request, response) => {
     request.body.likes = 0
   }
   const blog = new Blog(request.body)
+  const usr = jwt.verify(returnToken(request), config.SECRET)
   try {
       const req = await blog.save()
-      console.log(req)
-      const user = await User.findByIdAndUpdate(request.body.user)
+      const user = await User.findByIdAndUpdate(usr.id)
       user.blogs = user.blogs.concat(String(req._id))
       await user.save()
 
