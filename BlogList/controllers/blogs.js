@@ -6,6 +6,7 @@ const Blog = require('../models/blog')
 const User = require('../models/User')
 const jwt = require('jsonwebtoken')
 const config = require('../utils/config')
+const morgan = require('morgan')
 
 const returnToken = (request) => {
   const token = request.get('authorization')
@@ -17,9 +18,23 @@ const returnToken = (request) => {
 
 BlogRouter.use(cors())
 BlogRouter.use(express.json())
+BlogRouter.use(morgan((tokens, req, res) => {
+  let retArr = [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms'
+  ]
+  if (tokens.method(req, res) == 'POST') {
+    retArr.push(JSON.stringify(req.body))
+  }
+  return retArr.join(' ')
+}))
 
 BlogRouter.get('/', async (request, response, next) => {
   const blogs = await Blog.find({}).populate('user')
+  console.log(blogs)
   response.json(blogs)
 })
 
