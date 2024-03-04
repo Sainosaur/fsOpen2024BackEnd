@@ -34,7 +34,6 @@ BlogRouter.use(morgan((tokens, req, res) => {
 
 BlogRouter.get('/', async (request, response, next) => {
   const blogs = await Blog.find({}).populate('user')
-  console.log(blogs)
   response.json(blogs)
 })
 
