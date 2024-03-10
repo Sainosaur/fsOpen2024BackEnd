@@ -42,8 +42,9 @@ BlogRouter.post('/', async (request, response) => {
     request.body.likes = 0
   }
   const blog = new Blog(request.body)
-  const usr = jwt.verify(returnToken(request), config.SECRET)
   try {
+      const usr = jwt.verify(returnToken(request), config.SECRET)
+      blog.user = usr.id
       const req = await blog.save()
       const user = await User.findByIdAndUpdate(usr.id)
       user.blogs = user.blogs.concat(String(req._id))
