@@ -8,12 +8,6 @@ const mongoUrl = `mongodb+srv://saiadi4002:${process.env.MONGO_URI}@library.i84f
 
 let authors = []
 let books = []
-Author.find({}).then((data) => {
-  authors = data
-})
-Book.find({}).then((data) => {
-  books = data
-})
 
 
 const typeDefs = `
@@ -51,7 +45,7 @@ const resolvers = {
     authorCount: () => authors.length,
     allBooks: (root, args) => {
       let localBooks = [...books]
-      args.author ? localBooks = localBooks.filter(book => book.author === args.author) : null
+      args.author ? localBooks = localBooks.filter(book => book.author.name === args.author) : null
       args.genre ? localBooks = localBooks.filter(book => book.genres.includes(args.genre)) : null
       return localBooks
     },
@@ -70,7 +64,6 @@ const resolvers = {
       } else {
         newAuthor = authors.find((auth) => auth.name === args.author)
       }
-      console.log(newAuthor)
       const newBook = new Book({
         ...args,
         author: newAuthor
@@ -80,13 +73,11 @@ const resolvers = {
 
       return newBook
     },
-    editAuthor: (root, args) => {
+    editAuthor: async (root, args) => {
       let author = authors.find(author => author.name === args.name)
       if (author) {
-        author = {
-          ...author,
-          born: args.setBornYear
-        }
+        author.born = args.setBornYear
+        await Author.findByIdAndUpdate(author._id, author)
         authors = authors.map(a => a.name == author.name ? author : a)
       }
       return author
@@ -104,6 +95,17 @@ startStandaloneServer(server, {
 }).then(({ url }) => {
   mongoose.connect(mongoUrl)
   .then(() => console.log('MongoDB connection established'))
-  .then(() => console.log(`Server ready at ${url}`))
   .catch( (err) => console.log('failed to connect to MongoDB', err))
+
+  Author.find({})
+  .then((data) => {
+    authors = data
+  })
+  Book.find({})
+  .populate('author')
+  .then((data) => {
+    books = data.filter(data => data.author)
+  })
+  .then(() => console.log(`Server ready at ${url}`))
+  
 })
