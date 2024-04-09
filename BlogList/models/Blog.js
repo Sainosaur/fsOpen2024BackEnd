@@ -18,7 +18,8 @@ const blogSchema = new mongoose.Schema({
       ref: 'User',
       required: true
     },
-    likes: Number
+    likes: Number,
+    comments: Array
   })
   blogSchema.set('toJSON', {
     transform: (document, retObj) => {

@@ -6,7 +6,7 @@ const User = require('../models/User')
 const morgan = require('morgan')
 
 
-testingRouter.use(cors)
+testingRouter.use(cors())
 testingRouter.use(express.json())
 testingRouter.use(morgan((tokens, req, res) => {
     let retArr = [
@@ -22,8 +22,11 @@ testingRouter.use(morgan((tokens, req, res) => {
     return retArr.join(' ')
 }))
 
-testingRouter.post('/reset', async () => {
-    Blog.deleteMany({})
-    User.deleteMany({})
+testingRouter.post('/reset', async (req, res) => {
+    await Blog.deleteMany({})
+    await User.deleteMany({})
+    res.status(200).json('Databases reset, server ready for testing!')
 }) 
-  module.exports = testingRouter
+
+
+module.exports = testingRouter

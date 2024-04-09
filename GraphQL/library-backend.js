@@ -3,15 +3,29 @@ const { GraphQLError } = require('graphql')
 const { startStandaloneServer } = require('@apollo/server/standalone')
 const Book = require('./Models/Book')
 const Author = require('./Models/Author')
+const User = require('./Models/User')
 const mongoose = require('mongoose')
 require('dotenv').config()
 const mongoUrl = `mongodb+srv://saiadi4002:${process.env.MONGO_URI}@library.i84fg9g.mongodb.net/`
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
 
 let authors = []
 let books = []
+let users = []
 
 
 const typeDefs = `
+  type User {
+    username: String!
+    favouriteGenre: String!
+    passwordHash: String!
+  }
+
+  type Token {
+    value: String!
+  }
+
   type Book {
     title: String!
     author: Author!
@@ -28,6 +42,7 @@ const typeDefs = `
   }
 
   type Query {
+    me: User
     allBooks(author: String, genre:String): [Book]
     allAuthors: [Author]
     bookCount : Int!
@@ -35,6 +50,8 @@ const typeDefs = `
   }
   
   type Mutation {
+    createUser(username: String!, favouriteGenre: String!, password: String! ): User
+    login(username: String!, password: String! ): Token
     addBook(title: String!, author: String!, published: Int!, genres:[String]!): Book
     editAuthor(name: String, setBornYear: Int) : Author
   }
@@ -52,6 +69,9 @@ const resolvers = {
     },
     allAuthors: () => {
       return authors
+    },
+    me: (root, args, context) => {
+      return context.currentUser
     }
   }, Mutation: {
     addBook: async (root, args) => {
@@ -103,10 +123,49 @@ const resolvers = {
           authors = authors.map(a => a.name == author.name ? author : a)
         }
       } catch {
-        throw GraphQLError('Au')
+        throw GraphQLError('Author name too short', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.author
+          }
+        })
       }
 
       return author
+    },
+    login: async (root, args) => {
+        const usr = await User.findOne({username: args.username})
+        if (!usr) {
+          throw new GraphQLError('Incorrect Username', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              invalidArgs: args.username
+            }
+          })
+        }
+        const pwdMatch = await bcrypt.compare(args.password, usr.passwordHash)
+        if (pwdMatch) {
+          const Token = jwt.sign(usr.toJSON(), process.env.JWT_SECRET)
+          return {
+            value: Token
+          }
+        } else {
+          throw new GraphQLError('Incorrect Password', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              invalidArgs: args.password
+            }
+          })
+        }
+    },
+    createUser: async (root, args) => {
+      const newUsr = new User({
+        username: args.username,
+        favouriteGenre: args.favouriteGenre,
+        passwordHash: await bcrypt.hash(args.password, 10)
+      })
+      await newUsr.save()
+      return newUsr
     }
   }
 }
@@ -118,6 +177,14 @@ const server = new ApolloServer({
 
 startStandaloneServer(server, {
   listen: { port: 4000 },
+  context: async ({req, res}) => {
+    const auth = req ? req.headers.authorization : null
+    if (auth && auth.startsWith('Bearer ')) {
+      const decodedData = jwt.verify(auth.substring(7), process.env.JWT_SECRET)
+      const currentUser = await User.findById(decodedData._id)
+      return { currentUser }
+    }
+  }
 }).then(({ url }) => {
   // Gets the data from MongoDB as soon as server starts up sucessfully. 
   mongoose.connect(mongoUrl)
@@ -134,5 +201,4 @@ startStandaloneServer(server, {
     books = data.filter(data => data.author)
   })
   .then(() => console.log(`Server ready at ${url}`))
-  
 })
