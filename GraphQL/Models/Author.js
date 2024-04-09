@@ -1,13 +1,19 @@
 const mongoose = require('mongoose')
 
-// bookCount not included as it is calculated by the server itself thus not stored in the database. 
+const uniqueValidator = require('mongoose-unique-validator')
+
 const schema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-    }, born: {
-        type: Number,
-    }
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+    minlength: 4
+  },
+  born: {
+    type: Number,
+  },
 })
 
-module.exports =  mongoose.model('Author', schema)
+schema.plugin(uniqueValidator)
+
+module.exports = mongoose.model('Author', schema)

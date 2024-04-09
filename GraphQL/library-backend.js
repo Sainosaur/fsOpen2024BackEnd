@@ -1,4 +1,5 @@
 const { ApolloServer } = require('@apollo/server')
+const { GraphQLError } = require('graphql')
 const { startStandaloneServer } = require('@apollo/server/standalone')
 const Book = require('./Models/Book')
 const Author = require('./Models/Author')
@@ -53,14 +54,25 @@ const resolvers = {
       return authors
     }
   }, Mutation: {
-    addBook: (root, args) => {
+    addBook: async (root, args) => {
       let newAuthor;
       if (!authors.find(auth => auth.name === args.author)) {
-        newAuthor = new Author({
-          name: args.author,
-          born: null,
-        })
-        newAuthor.save().then(() => authors = authors.concat(newAuthor))
+        try {
+          newAuthor = new Author({
+            name: args.author,
+            born: null,
+          })
+          await newAuthor.save()
+          authors = authors.concat(newAuthor)
+        } catch {
+          throw new GraphQLError('Author name too short', {
+            extensions: {
+              code:'BAD_USER_INPUT',
+              invalidArgs: args.author
+            }
+          })
+        }
+
       } else {
         newAuthor = authors.find((auth) => auth.name === args.author)
       }
@@ -68,18 +80,32 @@ const resolvers = {
         ...args,
         author: newAuthor
       })
-      
-      newBook.save().then(() => books = books.concat(newBook))
+      try {
+        await newBook.save()
+        books = books.concat(newBook)  
+      } catch {
+        throw new GraphQLError('Book name too short', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.title
+          }
+        })
+      }
 
       return newBook
     },
     editAuthor: async (root, args) => {
-      let author = authors.find(author => author.name === args.name)
-      if (author) {
-        author.born = args.setBornYear
-        await Author.findByIdAndUpdate(author._id, author)
-        authors = authors.map(a => a.name == author.name ? author : a)
+      try {
+        let author = authors.find(author => author.name === args.name)
+        if (author) {
+          author.born = args.setBornYear
+          await Author.findByIdAndUpdate(author._id, author)
+          authors = authors.map(a => a.name == author.name ? author : a)
+        }
+      } catch {
+        throw GraphQLError('Au')
       }
+
       return author
     }
   }
@@ -93,6 +119,7 @@ const server = new ApolloServer({
 startStandaloneServer(server, {
   listen: { port: 4000 },
 }).then(({ url }) => {
+  // Gets the data from MongoDB as soon as server starts up sucessfully. 
   mongoose.connect(mongoUrl)
   .then(() => console.log('MongoDB connection established'))
   .catch( (err) => console.log('failed to connect to MongoDB', err))
