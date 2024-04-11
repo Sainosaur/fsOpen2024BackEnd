@@ -74,7 +74,7 @@ const resolvers = {
   }, Mutation: {
     addBook: async (root, args, context) => {
       if (!context.currentUser) {
-        throw new GraphQLError("No Active User, Editing books requires a logged in user", {
+        throw new GraphQLError("No Active User, Adding books requires a logged in user", {
           extensions:{
             code: 'FORBIDDEN'
           }
@@ -120,14 +120,15 @@ const resolvers = {
     },
     editAuthor: async (root, args, context) => {
       if (!context.currentUser) {
-        throw new GraphQLError("No Active User, Editing books requires a logged in user", {
+        throw new GraphQLError("No Active User, Modifying an author requires a logged in user", {
           extensions:{
             code: 'FORBIDDEN'
           }
         })
       }
+      let author;
       try {
-        let author = authors.find(author => author.name === args.name)
+        author = authors.find(author => author.name === args.name)
         if (author) {
           author.born = args.setBornYear
           await Author.findByIdAndUpdate(author._id, author)
@@ -141,7 +142,7 @@ const resolvers = {
           }
         })
       }
-
+      console.log(author)
       return author
     },
     login: async (root, args) => {
