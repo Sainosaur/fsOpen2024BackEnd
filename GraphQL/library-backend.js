@@ -12,8 +12,6 @@ const bcrypt = require('bcrypt')
 
 let authors = []
 let books = []
-let users = []
-
 
 const typeDefs = `
   type User {
@@ -74,7 +72,14 @@ const resolvers = {
       return context.currentUser
     }
   }, Mutation: {
-    addBook: async (root, args) => {
+    addBook: async (root, args, context) => {
+      if (!context.currentUser) {
+        throw new GraphQLError("No Active User, Editing books requires a logged in user", {
+          extensions:{
+            code: 'FORBIDDEN'
+          }
+        })
+      }
       let newAuthor;
       if (!authors.find(auth => auth.name === args.author)) {
         try {
@@ -111,10 +116,16 @@ const resolvers = {
           }
         })
       }
-
       return newBook
     },
-    editAuthor: async (root, args) => {
+    editAuthor: async (root, args, context) => {
+      if (!context.currentUser) {
+        throw new GraphQLError("No Active User, Editing books requires a logged in user", {
+          extensions:{
+            code: 'FORBIDDEN'
+          }
+        })
+      }
       try {
         let author = authors.find(author => author.name === args.name)
         if (author) {
