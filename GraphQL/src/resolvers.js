@@ -17,26 +17,24 @@ mongoose.connect(mongoUrl)
 .then(() => console.log('MongoDB connection established'))
 .catch( (err) => console.log('failed to connect to MongoDB', err))
 
-
-let authors = []
-let books = []
-
-Author.find({}).then(data => authors = data).then(data => console.log('Author data accquired from MongoDB'))
-Book.find({}).populate('author').then(data => books = data).then(data => console.log('Book data accquired from MongoDB'))
-
-
 const resolvers = {
     Query:  {
-      bookCount: () => books.length,
-      authorCount: () => authors.length,
-      allBooks: (root, args) => {
-        let localBooks = [...books]
-        args.author ? localBooks = localBooks.filter(book => book.author.name === args.author) : null
-        args.genre ? localBooks = localBooks.filter(book => book.genres.includes(args.genre)) : null
-        return localBooks
+      bookCount: async () => {
+        const books = await Book.find({})
+        return books.length
       },
-      allAuthors: () => {
-        return authors
+      authorCount: async () => {
+        const authors = await Author.find({})
+        return authors.length
+      },
+      allBooks: async (root, args) => {
+        let books = Book.find({}).populate('author')
+        args.author ? books = books.filter(book => book.author.name === args.author) : null
+        args.genre ? books = books.filter(book => book.genres.includes(args.genre)) : null
+        return books
+      },
+      allAuthors: async () => {
+        return await Author.find({})
       },
       me: (root, args, context) => {
         return context.currentUser
@@ -47,19 +45,18 @@ const resolvers = {
         if (!context.currentUser) {
           throw new GraphQLError("No Active User, Adding books requires a logged in user", {
             extensions:{
-              code: 'FORBIDDEN'
+              code: 'BAD_USER_INPUT'
             }
           })
         }
         let newAuthor;
-        if (!authors.find(auth => auth.name === args.author)) {
+        if (! await Author.findOne({name: args.author})) {
           try {
             newAuthor = new Author({
               name: args.author,
               born: null,
             })
             await newAuthor.save()
-            authors = authors.concat(newAuthor)
           } catch {
             throw new GraphQLError('Author name too short', {
               extensions: {
@@ -70,7 +67,7 @@ const resolvers = {
           }
   
         } else {
-          newAuthor = authors.find((auth) => auth.name === args.author)
+          newAuthor = await Author.findOne({name: args.author})
         }
         const newBook = new Book({
           ...args,
@@ -78,7 +75,6 @@ const resolvers = {
         })
         try {
           await newBook.save()
-          books = books.concat(newBook)
         } catch {
           throw new GraphQLError('Book name too short', {
             extensions: {
@@ -101,12 +97,11 @@ const resolvers = {
           })
         }
         try {
-          let author = authors.find(author => author.name === args.name)
+          let author = Author.findOne({name: args.name})
           console.log(author)
           if (author) {
             author.born = args.setBornYear
             await Author.findByIdAndUpdate(author._id, author)
-            authors = authors.map(a => a.name == author.name ? author : a)
           }
         } catch {
           throw GraphQLError('Author name too short', {
