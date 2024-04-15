@@ -20,8 +20,8 @@ mongoose.connect(mongoUrl)
 const resolvers = {
     Query:  {
       bookCount: async () => {
-        const books = await Book.find({})
-        return books.length
+          const books = await Book.find({})
+          return books.length
       },
       authorCount: async () => {
         const authors = await Author.find({})
@@ -55,6 +55,7 @@ const resolvers = {
             newAuthor = new Author({
               name: args.author,
               born: null,
+              bookCount: 1
             })
             await newAuthor.save()
           } catch {
@@ -68,6 +69,8 @@ const resolvers = {
   
         } else {
           newAuthor = await Author.findOne({name: args.author})
+          newAuthor.bookCount++
+          await Author.findByIdAndUpdate(newAuthor._id, newAuthor)
         }
         const newBook = new Book({
           ...args,
